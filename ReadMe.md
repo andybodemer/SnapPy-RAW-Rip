@@ -13,27 +13,27 @@ A lightweight Python utility for photographers that automates RAW and JPG import
 Currently configured to detect:
 
 * Standard Images
-    ".jpg", ".jpeg", ".png", ".heic", ".tiff", ".tif",
+    '.jpg', '.jpeg', '.png', '.heic', '.tiff', '.tif',
 * Generic RAW: / Adobe / DJI / Ricoh
-    ".dng",
+    '.dng',
 * Canon
-    ".cr2", ".cr3",
+    '.cr2', '.cr3',
 * Nikon
-    ".nef", ".nrw",
+    '.nef', '.nrw',
 * Sony
-    ".arw", ".srf", ".sr2",
+    '.arw', '.srf', '.sr2',
 * Fuji
-    ".raf",
+    '.raf',
 * Olympus
-    ".orf",
+    '.orf',
 * Panasonic
-    ".rw2", ".raw",
+    '.rw2', '.raw',
 * Phase One / Leaf
-    ".iiq",
+    '.iiq',
 * Pentax
-    ".pef", ".ptx",
+    '.pef', '.ptx',
 * Hasselblad
-    ".3fr", ".fff",
+    '.3fr', '.fff',
 
 ## Requirements / Dependencies
 * macOS (Script relies on `/Volumes` detection)
@@ -45,4 +45,8 @@ Currently configured to detect:
 3. Follow the text prompts
 
 ## Planned Updates
-This current version relies on reading the photo's modification timestamp. In a future release, I hope to include something that reads file meta data.
+* This current version relies on reading the photo's modification timestamp. In a future release, I hope to include something that reads file meta data.
+* Improve and clarify user prompts
+* Windows Support
+* Linux Support
+
