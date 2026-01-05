@@ -11,27 +11,28 @@ A lightweight Python utility for photographers that automates RAW and JPG import
 
 ## Supported Formats
 Currently configured to detect:
-# Standard Images
+
+* Standard Images
     ".jpg", ".jpeg", ".png", ".heic", ".tiff", ".tif",
-    # Generic RAW: / Adobe / DJI / Ricoh
+* Generic RAW: / Adobe / DJI / Ricoh
     ".dng",
-    # Canon
+* Canon
     ".cr2", ".cr3",
-    # Nikon
+* Nikon
     ".nef", ".nrw",
-    # Sony
+* Sony
     ".arw", ".srf", ".sr2",
-    # Fuji
+* Fuji
     ".raf",
-    # Olympus
+* Olympus
     ".orf",
-    # Panasonic
+* Panasonic
     ".rw2", ".raw",
-    # Phase One / Leaf
+* Phase One / Leaf
     ".iiq",
-    # Pentax
+* Pentax
     ".pef", ".ptx",
-    # Hasselblad
+* Hasselblad
     ".3fr", ".fff",
 
 ## Requirements / Dependencies
@@ -43,4 +44,5 @@ Currently configured to detect:
 2. Run: `python3 snappy_raw_rip.py`
 3. Follow the text prompts
 
-
+## Planned Updates
+This current version relies on reading the photo's modification timestamp. In a future release, I hope to include something that reads file meta data.
