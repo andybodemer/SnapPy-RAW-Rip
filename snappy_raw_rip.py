@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
 #imports
-from pathlib import Path 
+from pathlib import Path
 from datetime import datetime
 import shutil
+import os
 
 
 #constants
@@ -99,22 +100,39 @@ def get_destinations():
     """Show destinations menu and get user selections."""
     destinations = load_destinations()
     while True:
-        print("\n=== Select Destinations ===")
+        print("\n" + "=" * 50)
+        print("=== Select Destinations ===")
+        print("=" * 50)
         if destinations:
             for i, dest in enumerate(destinations, 1):
                 print(f"  [{i}] {dest}")
-        else: 
+            print("-" * 50)
+        else:
             print("  No saved destinations.")
+            print("-" * 50)
         print("  [a] Add new destination")
-        choice = input("\nEnter Selection (e.g. 1, 2, or a)").strip().lower()
+        print("=" * 50)
+        choice = input("\nEnter selection (e.g., 1, 2, or a): ").strip().lower()
         if choice == "a":
             new_dest = input("Enter full path: ").strip()
-            if new_dest and Path(new_dest).exists():
-                destinations.append(new_dest)
-                save_destinations(destinations)
-                print(f"Added: {new_dest}")
+            if not new_dest:
+                print("No path entered.")
+                continue
+            # Expand ~ and resolve relative paths
+            dest_path = Path(new_dest).expanduser().resolve()
+            # Validate the path
+            if not dest_path.exists():
+                print(f"Error: Path does not exist: {dest_path}")
+            elif not dest_path.is_dir():
+                print(f"Error: Path is not a directory: {dest_path}")
+            elif not os.access(dest_path, os.W_OK):
+                print(f"Error: No write permission for: {dest_path}")
             else:
-                print("Invalid path. Make sure the path exists.")
+                # Convert to string for storage
+                dest_str = str(dest_path)
+                destinations.append(dest_str)
+                save_destinations(destinations)
+                print(f"Added: {dest_str}")
         else:
             try:
                 indices = [int(x.strip()) for x in choice.split(",")]
@@ -124,22 +142,62 @@ def get_destinations():
             except (ValueError, IndexError):
                 print("Invalid selection. Try again?")
 
+def sanitize_shoot_name(name):
+    """Remove or replace characters that are invalid in filesystem paths."""
+    if not name:
+        return ""
+    # Invalid characters for most filesystems: / \ : * ? " < > |
+    invalid_chars = ['/', '\\', ':', '*', '?', '"', '<', '>', '|']
+    sanitized = name
+    for char in invalid_chars:
+        sanitized = sanitized.replace(char, '_')
+    # Remove leading/trailing whitespace and dots (problematic on some systems)
+    sanitized = sanitized.strip('. ')
+    return sanitized
+
 def get_shoot_name():
     """Asks the user for a shoot name to add to the destination folder"""
-    return input("Enter shoot name for final folders (or press Enter to skip)").strip()
+    raw_name = input("Enter shoot name for final folders (or press Enter to skip): ").strip()
+    if not raw_name:
+        return ""
+    sanitized = sanitize_shoot_name(raw_name)
+    if sanitized != raw_name:
+        print(f"Note: Shoot name sanitized to: '{sanitized}'")
+    return sanitized
+
+def format_file_size(size_bytes):
+    """Convert bytes to human-readable format."""
+    for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
+        if size_bytes < 1024.0:
+            return f"{size_bytes:.2f} {unit}"
+        size_bytes /= 1024.0
+    return f"{size_bytes:.2f} PB"
+
+def calculate_total_size(grouped_photos):
+    """Calculate total size of all photos to be copied."""
+    total_bytes = 0
+    for photos in grouped_photos.values():
+        for photo in photos:
+            total_bytes += photo.stat().st_size
+    return total_bytes
 
 def confirm_copy(grouped_photos, destinations, shoot_name):
     """Show summary and ask user to confirm before copying."""
     total_photos = sum(len(photos) for photos in grouped_photos.values())
-    print("\n=== Copy Summary ===")
+    total_size = calculate_total_size(grouped_photos)
+    print("\n" + "=" * 50)
+    print("=== Copy Summary ===")
+    print("=" * 50)
     print(f"Photos: {total_photos}")
+    print(f"Total size: {format_file_size(total_size)}")
     print(f"Dates: {len(grouped_photos)}")
     print(f"Shoot name: '{shoot_name}'" if shoot_name else "Shoot name: (none)")
     print(f"Destinations ({len(destinations)}):")
     for dest in destinations:
         print(f"  - {dest}")
+    print("=" * 50)
     answer = input("\nProceed with copy? (y/n): ").strip().lower()
-    return answer == "y"
+    return answer in ["y", "yes"]
 
 def check_conflicts(grouped_photos, destinations, shoot_name):
     """Check if any files already exist at destinations."""
@@ -155,12 +213,16 @@ def check_conflicts(grouped_photos, destinations, shoot_name):
 
 def handle_conflicts():
     """Ask user how to handle existing files."""
-    print("\n=== Conflict Resolution ===")
+    print("\n" + "=" * 50)
+    print("=== Conflict Resolution ===")
+    print("=" * 50)
     print("Some files already exist at the destination.")
+    print()
     print("  [s] Skip - Don't copy files that already exist")
     print("  [o] Overwrite - Replace existing files")
     print("  [r] Rename - Add number to filename (e.g., IMG_001 (2).CR3)")
-    
+    print("=" * 50)
+
     while True:
         choice = input("\nHow to handle conflicts? (s/o/r): ").strip().lower()
         if choice in ["s", "o", "r"]:
