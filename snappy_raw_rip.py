@@ -118,6 +118,8 @@ def get_destinations():
             if not new_dest:
                 print("No path entered.")
                 continue
+            # Remove surrounding quotes if present
+            new_dest = new_dest.strip('\'"')
             # Expand ~ and resolve relative paths
             dest_path = Path(new_dest).expanduser().resolve()
             # Validate the path

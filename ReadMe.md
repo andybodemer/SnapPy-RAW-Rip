@@ -4,10 +4,13 @@ A lightweight Python utility for photographers that automates RAW and JPG import
 ## Features
 * **Auto-Detection:** Automatically searches for mounted drives with a `DCIM` folder.
 * **Date-Based Sorting:** Reads file modification timestamps to group photos into `YYYY` -> `YYYY-MM` -> `YYYY-MM-DD` folders.
-* **Shoot Naming:** Optional prompt to append a specific shoot name to the final folder (e.g., `2026-01-04 Sunrise`).
-* **Multi-Target Backup:** Simultaneously copy photos to multiple destinations (exmaple: your working SSD and NAS).
+* **Shoot Naming:** Optional prompt to append a specific shoot name to the final folder (e.g., `2026-01-04 Sunrise`). Invalid filesystem characters are automatically sanitized.
+* **Multi-Target Backup:** Simultaneously copy photos to multiple destinations (example: your working SSD and NAS).
 * **Conflict Resolution:** Manage duplicate files with options to **Skip**, **Overwrite**, or **Rename**.
-* **Save Preivous Destinations:** Remembers your previously used backup locations in a local text file.
+* **Save Previous Destinations:** Remembers your previously used backup locations in a local text file.
+* **Smart Path Validation:** Supports `~` expansion and relative paths, with validation for directory existence and write permissions.
+* **File Size Display:** Shows total size of photos to be copied in human-readable format before proceeding.
+* **Flexible Input:** Accepts various confirmation formats (y/yes/Y/Yes/YES) for better usability.
 
 ## Supported Formats
 Currently configured to detect:
@@ -44,9 +47,16 @@ Currently configured to detect:
 2. Run: `python3 snappy_raw_rip.py`
 3. Follow the text prompts
 
+## Recent Updates (v1.1)
+* Added shoot name sanitization for invalid filesystem characters
+* Enhanced path input with `~` expansion, directory validation, and write permission checks
+* Improved confirmation input to accept flexible formats (y/yes in any case)
+* Added total file size display in human-readable format before copying
+* Enhanced menu readability with visual separators
+* Consistent prompt formatting with colons and proper spacing
+
 ## Planned Updates
 * This current version relies on reading the photo's modification timestamp. In a future release, I hope to include something that reads file meta data.
-* Improve and clarify user prompts
 * Windows Support
 * Linux Support
 
