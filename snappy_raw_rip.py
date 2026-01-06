@@ -290,6 +290,6 @@ else:
             print(f"\nFound {len(conflicts)} existing files.")
             conflict_mode = handle_conflicts()
         copy_photos(grouped, destinations, shoot_name, conflict_mode)
-        print("\nCopy Complete!")
+        print("\nCopy Complete! Close and Re-open program to run again.")
     else:
         print("\nCopy cancelled.")
