@@ -10,9 +10,9 @@ import shutil
 VOLUMES_PATH = Path("/Volumes")
 SKIP_VOLUMES = {"Macintosh HD", "Macintosh HD - Data"} # future improvement, enhanced drive detection
 PHOTO_EXTENSIONS = {
-       # Standard Images
+    # Standard Images
     ".jpg", ".jpeg", ".png", ".heic", ".tiff", ".tif",
-     # Generic RAW: / Adobe / DJI / Ricoh
+    # Generic RAW: / Adobe / DJI / Ricoh
     ".dng",
     # Canon
     ".cr2", ".cr3",
@@ -29,7 +29,7 @@ PHOTO_EXTENSIONS = {
     # Phase One / Leaf
     ".iiq",
     # Pentax
-    ".pef", "ptx",
+    ".pef", ".ptx",
     # Hasselblad
     ".3fr", ".fff",
 
