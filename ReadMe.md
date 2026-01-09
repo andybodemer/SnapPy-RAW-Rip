@@ -7,8 +7,8 @@ A lightweight Python utility for photographers that automates RAW and JPG import
 * **Shoot Naming:** Optional prompt to append a specific shoot name to the final folder (e.g., `2026-01-04 Sunrise`). Invalid filesystem characters are automatically sanitized.
 * **Multi-Target Backup:** Simultaneously copy photos to multiple destinations (example: your working SSD and NAS).
 * **Conflict Resolution:** Manage duplicate files with options to **Skip**, **Overwrite**, or **Rename**.
-* **Save Previous Destinations:** Remembers your previously used backup locations in a local text file.
-* **Smart Path Validation:** Supports `~` expansion and relative paths, with validation for directory existence and write permissions.
+* **Destination Management:** Save, select, and remove backup locations with an intuitive menu system.
+* **GUI Folder Picker:** Use native macOS file dialog to select destination folders instead of manually typing paths.
 * **File Size Display:** Shows total size of photos to be copied in human-readable format before proceeding.
 * **Flexible Input:** Accepts various confirmation formats (y/yes/Y/Yes/YES) for better usability.
 
@@ -40,14 +40,20 @@ Currently configured to detect:
 
 ## Requirements / Dependencies
 * macOS (Script relies on `/Volumes` detection)
-* Python 3
+* Python 3 with tkinter (included by default in most Python installations)
 
 ## Usage
 1. Connect your SD Card
 2. Run: `python3 snappy_raw_rip.py`
 3. Follow the text prompts
 
-## Recent Updates (v1.1)
+## Recent Updates (v1.2)
+* Added GUI folder picker using native macOS file dialog (tkinter)
+* Added option to remove saved destinations from the menu
+* Simplified path handling by using native dialog output
+* Improved destination management UX
+
+### Previous Updates (v1.1)
 * Added shoot name sanitization for invalid filesystem characters
 * Enhanced path input with `~` expansion, directory validation, and write permission checks
 * Improved confirmation input to accept flexible formats (y/yes in any case)
