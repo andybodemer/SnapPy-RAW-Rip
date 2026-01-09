@@ -5,6 +5,8 @@ from pathlib import Path
 from datetime import datetime
 import shutil
 import os
+import tkinter as tk
+from tkinter import filedialog
 
 
 #constants
@@ -83,6 +85,15 @@ def group_photos_by_date(photos):
         grouped[date].append(photo)
     return grouped
 
+def select_directory():
+    """Open a file dialog to select a directory."""
+    root = tk.Tk()
+    root.withdraw()  # Hide the main window
+    root.attributes('-topmost', True)  # Bring dialog to front
+    directory = filedialog.askdirectory(title="Select Destination Directory")
+    root.destroy()
+    return directory
+
 def load_destinations():
     """Load any saved file destinations from txt file."""
     if not DESTINATIONS_FILE.exists():
@@ -111,17 +122,17 @@ def get_destinations():
             print("  No saved destinations.")
             print("-" * 50)
         print("  [a] Add new destination")
+        if destinations:
+            print("  [b] Remove destination")
         print("=" * 50)
-        choice = input("\nEnter selection (e.g., 1, 2, or a): ").strip().lower()
+        choice = input("\nEnter selection (e.g., 1, 2, a, or b): ").strip().lower()
         if choice == "a":
-            new_dest = input("Enter full path: ").strip()
+            print("Opening folder selector...")
+            new_dest = select_directory()
             if not new_dest:
-                print("No path entered.")
+                print("No directory selected.")
                 continue
-            # Remove surrounding quotes if present
-            new_dest = new_dest.strip('\'"')
-            # Expand ~ and resolve relative paths
-            dest_path = Path(new_dest).expanduser().resolve()
+            dest_path = Path(new_dest).resolve()
             # Validate the path
             if not dest_path.exists():
                 print(f"Error: Path does not exist: {dest_path}")
@@ -135,6 +146,21 @@ def get_destinations():
                 destinations.append(dest_str)
                 save_destinations(destinations)
                 print(f"Added: {dest_str}")
+        elif choice == "b":
+            if not destinations:
+                print("No destinations to remove.")
+                continue
+            remove_choice = input("Enter number to remove: ").strip()
+            try:
+                remove_index = int(remove_choice)
+                if 1 <= remove_index <= len(destinations):
+                    removed = destinations.pop(remove_index - 1)
+                    save_destinations(destinations)
+                    print(f"Removed: {removed}")
+                else:
+                    print(f"Invalid number. Choose between 1 and {len(destinations)}.")
+            except ValueError:
+                print("Invalid input. Please enter a number.")
         else:
             try:
                 indices = [int(x.strip()) for x in choice.split(",")]
