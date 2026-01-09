@@ -270,14 +270,15 @@ def build_folder_path(base_path, date, shoot_name):
 
 def copy_photos(grouped_photos, destinations, shoot_name, conflict_mode=None):
     """Copy photos to specified destinations, organized by date"""
-    for dest in destinations:
+    total_dests = len(destinations)
+    for dest_idx, dest in enumerate(destinations, 1):
         for date, photos in grouped_photos.items():
             folder = build_folder_path(dest, date, shoot_name)
             folder.mkdir(parents=True, exist_ok=True)
             total = len(photos)
             for i, photo in enumerate(photos, 1):
                 dest_file = folder / photo.name
-                
+
                 # Handle conflicts
                 if dest_file.exists():
                     if conflict_mode == "s":
@@ -290,9 +291,12 @@ def copy_photos(grouped_photos, destinations, shoot_name, conflict_mode=None):
                         while dest_file.exists():
                             dest_file = folder / f"{stem} ({counter}){suffix}"
                             counter += 1
-                
+
                 shutil.copy2(photo, dest_file)
-                print(f"Copying to {folder.name}: {i}/{total}    ", end="\r")
+                if total_dests > 1:
+                    print(f"Copying into folder {dest_idx}/{total_dests}, image {i}/{total} into {folder}    ", end="\r")
+                else:
+                    print(f"Copying image {i}/{total} into {folder}    ", end="\r")
             print()
 
 

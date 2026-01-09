@@ -47,7 +47,12 @@ Currently configured to detect:
 2. Run: `python3 snappy_raw_rip.py`
 3. Follow the text prompts
 
-## Recent Updates (v1.2)
+## Recent Updates (v1.3)
+* Improved copy progress display:
+  * Single destination: `Copying image 2/30 into /path/to/folder`
+  * Multiple destinations: `Copying into folder 1/3, image 2/30 into /path/to/folder`
+
+### Previous Updates (v1.2)
 * Added GUI folder picker using native macOS file dialog (tkinter)
 * Added option to remove saved destinations from the menu
 * Simplified path handling by using native dialog output
