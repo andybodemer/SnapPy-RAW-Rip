@@ -3,7 +3,9 @@ A lightweight Python utility for photographers that automates RAW and JPG import
 
 ## Features
 * **Auto-Detection:** Automatically searches for mounted drives with a `DCIM` folder.
-* **Date-Based Sorting:** Reads file modification timestamps to group photos into `YYYY` -> `YYYY-MM` -> `YYYY-MM-DD` folders.
+* **Manual File Selection:** If no SD card is found, offers to open a native file picker for manual selection.
+* **EXIF Date Extraction:** Reads DateTimeOriginal from photo EXIF data for accurate date sorting. Supports Canon CR3, Fujifilm RAF, and other RAW formats.
+* **Date-Based Sorting:** Groups photos into `YYYY` -> `YYYY-MM` -> `YYYY-MM-DD` folders based on capture date.
 * **Shoot Naming:** Optional prompt to append a specific shoot name to the final folder (e.g., `2026-01-04 Sunrise`). Invalid filesystem characters are automatically sanitized.
 * **Multi-Target Backup:** Simultaneously copy photos to multiple destinations (example: your working SSD and NAS).
 * **Conflict Resolution:** Manage duplicate files with options to **Skip**, **Overwrite**, or **Rename**.
@@ -43,11 +45,16 @@ Currently configured to detect:
 * Python 3 with tkinter (included by default in most Python installations)
 
 ## Usage
-1. Connect your SD Card
+1. Connect your SD Card (or run without one for manual file selection)
 2. Run: `python3 snappy_raw_rip.py`
 3. Follow the text prompts
 
-## Recent Updates (v1.3)
+## Recent Updates (v1.4)
+* **EXIF-based date sorting:** Now reads DateTimeOriginal from EXIF metadata instead of file modification time
+* **Manual file selection fallback:** If no SD card is detected, prompts to select files manually via Finder
+* **Fixed EXIF parsing:** Improved support for Canon CR3 and Fujifilm RAF files
+
+### Previous Updates (v1.3)
 * Improved copy progress display:
   * Single destination: `Copying image 2/30 into /path/to/folder`
   * Multiple destinations: `Copying into folder 1/3, image 2/30 into /path/to/folder`
@@ -67,7 +74,6 @@ Currently configured to detect:
 * Consistent prompt formatting with colons and proper spacing
 
 ## Planned Updates
-* This current version relies on reading the photo's modification timestamp. In a future release, I hope to include something that reads file meta data.
 * Windows Support
 * Linux Support
 
