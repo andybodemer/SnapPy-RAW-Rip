@@ -156,9 +156,25 @@ def _extract_date_from_raf(file_path):
             if exif_offset == 0 or exif_offset > 10000000:
                 return None
 
-            # Seek to EXIF data and verify TIFF signature
+            # RAF files embed a JPEG with EXIF in APP1 segment
+            # The offset points to JPEG SOI marker (FFD8), followed by APP1 (FFE1)
+            # Structure: FFD8 FFE1 [2-byte length] "Exif\x00\x00" [TIFF data]
             f.seek(exif_offset)
-            tiff_header = f.read(8)
+            jpeg_header = f.read(12)
+            if len(jpeg_header) < 12:
+                return None
+
+            # Check for JPEG SOI + APP1 markers
+            if jpeg_header[0:4] == b'\xff\xd8\xff\xe1':
+                # Skip: SOI(2) + APP1 marker(2) + length(2) + "Exif\x00\x00"(6) = 12 bytes
+                tiff_base = exif_offset + 12
+                f.seek(tiff_base)
+                tiff_header = f.read(8)
+            else:
+                # Fallback: try direct TIFF header
+                tiff_base = exif_offset
+                tiff_header = jpeg_header[0:8]
+
             if len(tiff_header) < 8:
                 return None
 
@@ -170,7 +186,7 @@ def _extract_date_from_raf(file_path):
                 return None
 
             ifd_offset = struct.unpack(f'{byte_order}I', tiff_header[4:8])[0]
-            date_str = _find_datetime_in_ifd(f, ifd_offset, exif_offset, byte_order)
+            date_str = _find_datetime_in_ifd(f, ifd_offset, tiff_base, byte_order)
             return _parse_date_string(date_str) if date_str else None
     except Exception:
         return None
@@ -206,15 +222,20 @@ def _extract_date_from_cr3(file_path):
                     uuid_hex = binascii.hexlify(uuid_bytes).decode('utf-8')
 
                     if uuid_hex == CANON_CMT1_UUID:
-                        # Search for TIFF header in this UUID box
+                        # CR3 CMT1 box contains multiple TIFF structures
+                        # Search through all TIFF headers for DateTimeOriginal
                         search_start = f.tell()
                         chunk = f.read(min(200000, box_size - header_len - 16))
 
-                        tiff_idx = chunk.find(TIFF_SIGNATURE_LE)
-                        if tiff_idx == -1:
-                            tiff_idx = chunk.find(TIFF_SIGNATURE_BE)
+                        # Find all TIFF signatures and check each for DateTimeOriginal
+                        search_pos = 0
+                        while search_pos < len(chunk) - 8:
+                            tiff_idx = chunk.find(TIFF_SIGNATURE_LE, search_pos)
+                            if tiff_idx == -1:
+                                tiff_idx = chunk.find(TIFF_SIGNATURE_BE, search_pos)
+                            if tiff_idx == -1:
+                                break
 
-                        if tiff_idx != -1:
                             tiff_base = search_start + tiff_idx
 
                             if chunk[tiff_idx:tiff_idx+2] == b'II':
@@ -228,6 +249,9 @@ def _extract_date_from_cr3(file_path):
                                 date_str = _find_datetime_in_ifd(f, ifd_offset, tiff_base, byte_order)
                                 if date_str:
                                     return _parse_date_string(date_str)
+
+                            # Move past this TIFF signature to find the next one
+                            search_pos = tiff_idx + 1
 
                 # Navigate container boxes
                 if box_type in ['moov', 'trak', 'mdia', 'minf', 'stbl']:
@@ -289,7 +313,7 @@ def _get_exif_date(photo_path):
     else:
         return _extract_date_generic_scan(photo_path)
 
-#fucntions
+#functions
 def find_sd_card():
     """Scan /Volumes for a drive with DCIM folder at the top level."""
     for volume in VOLUMES_PATH.iterdir():
@@ -307,6 +331,32 @@ def find_photos(dcim_path):
         if file.suffix.lower() in PHOTO_EXTENSIONS:
             photos.append(file)
     return photos
+
+def select_source_files():
+    """Open a file dialog to select photo files."""
+    root = tk.Tk()
+    root.withdraw()  # Hide the main window
+    root.attributes('-topmost', True)  # Bring dialog to front
+    root.update()  # Process any pending events
+
+    # Build file type filter from PHOTO_EXTENSIONS
+    extensions = " ".join(f"*{ext}" for ext in sorted(PHOTO_EXTENSIONS))
+    filetypes = [
+        ("Photo files", extensions),
+        ("All files", "*.*")
+    ]
+
+    files = filedialog.askopenfilenames(
+        title="Select Photos to Import",
+        filetypes=filetypes
+    )
+
+    # Fully clean up tkinter to prevent macOS terminal issues
+    root.update()
+    root.destroy()
+    root.quit()
+
+    return [Path(f) for f in files] if files else []
 
 def get_all_photo_dates(photos):
     """Get dates for all photos, preferring EXIF DateTimeOriginal."""
@@ -364,8 +414,14 @@ def select_directory():
     root = tk.Tk()
     root.withdraw()  # Hide the main window
     root.attributes('-topmost', True)  # Bring dialog to front
+    root.update()  # Process any pending events
     directory = filedialog.askdirectory(title="Select Destination Directory")
+
+    # Fully clean up tkinter to prevent macOS terminal issues
+    root.update()
     root.destroy()
+    root.quit()
+
     return directory
 
 def load_destinations():
@@ -572,13 +628,28 @@ def copy_photos(grouped_photos, destinations, shoot_name, conflict_mode=None):
 
 
 #main
+print("Scanning for SD card...")
 sd_card = find_sd_card()
-if not sd_card:
-    print("No SD Card Found")
-else:
-    print(f"SD Card: {sd_card}")
+
+if sd_card:
+    print(f"Found SD card: {sd_card.parent.name}")
     photos = find_photos(sd_card)
     print(f"Found {len(photos)} photos")
+else:
+    print("No SD card found.")
+    choice = input("Select files manually? (y/n): ").strip().lower()
+    if choice in ["y", "yes"]:
+        print("Opening file picker...")
+        photos = select_source_files()
+        if photos:
+            print(f"Selected {len(photos)} photos")
+        else:
+            print("No files selected.")
+            photos = []
+    else:
+        photos = []
+
+if photos:
     grouped = group_photos_by_date(photos)
     print(f"Photos span {len(grouped)} dates")
     destinations = get_destinations()
