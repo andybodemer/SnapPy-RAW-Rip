@@ -1,5 +1,5 @@
 # SnapPy RAW Rip
-A lightweight Python utility for photographers that automates RAW and JPG import. This tool scans for connected volumes and copies photos into one or more folders using an ISO date-based hierarchy.
+A lightweight Python utility for photographers that automates RAW and JPG import. This tool scans for connected volumes and copies photos into one or more folders using an ISO date-based hierarchy. This script reads binary to exctract Exif data from Canon, Nikon, Fuji, Sony, and other camera makes without dependencies--should be fast.
 
 ## Features
 * **Auto-Detection:** Automatically searches for mounted drives with a `DCIM` folder.
